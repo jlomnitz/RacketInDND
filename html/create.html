@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+  <body>
+    <h1>D&D Character Creator</h1>
+    <script type="text/javascript">
+      
+      function ModifiedDieRoll() {
+          var roll = Math.floor(Math.random()*6 + 1);
+          if (roll == 1) {
+              roll = ModifiedDieRoll();
+          }
+          return roll;
+      }
+      
+      function StandardRoll() {
+          var rolls = [ModifiedDieRoll(), ModifiedDieRoll(), ModifiedDieRoll(), ModifiedDieRoll()];
+          var min = 0;
+          var attribute = 0;
+          for (var i = 1; i < rolls.length; i++) {
+              if (rolls[i] < rolls[min]) {
+		 min = i;
+	      }
+          }
+	  for (var i = 0; i < rolls.length; i++) {
+	      if (i != min) {
+		 attribute += rolls[i];
+	      }
+          }
+          return attribute;
+      }
+
+      function NewAttributes() {
+          document.getElementById("str").value = StandardRoll();
+          document.getElementById("dex").value = StandardRoll();
+          document.getElementById("con").value = StandardRoll();
+          document.getElementById("int").value = StandardRoll();
+          document.getElementById("wis").value = StandardRoll();
+          document.getElementById("cha").value = StandardRoll();
+      }
+      
+      function CreateCharacter() {
+          var xhttp = new XMLHttpRequest();
+          var name = document.getElementById("name").value;
+          var race = document.getElementById("race").value;
+          var char_class = document.getElementById("class").value;
+          var str = document.getElementById("str").value;
+          var dex = document.getElementById("dex").value;
+          var con = document.getElementById("con").value;
+          var int = document.getElementById("int").value;
+          var wis = document.getElementById("wis").value;
+          var cha = document.getElementById("cha").value;
+          xhttp.onreadystatechange = function() {
+              if (xhttp.readyState == 4  && xhttp.status == 200) {
+	          var new_content = xhttp.responseText;
+	          document.write(new_content);
+	          document.close();
+	      }
+          };
+          xhttp.open(@Method, @Target, true);
+          xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+          var arguments = "name="+name+"&race="+race+"&class="+char_class+"&str="+str+"&dex="+dex+"&con="+con+"&int="+int+"&wis="+wis+"&cha="+cha;
+	  xhttp.send(arguments);    
+     }
+    </script>
+    <table>
+      <tr>
+	<td>
+	  <b>Name:</b><input id="name"> @Name </input>
+	</td>
+	<td>
+	  <b>Race:</b><input id="race"> @Race </input>
+	</td>
+	<td>
+          <b>Class:</b><input id="class"> @Class </input>
+        </td>
+      </tr>
+      <tr>
+	<td>
+          <b>Strength:</b><input id="str"> @Str </input>
+        </td>
+	<td>
+          <b>Dexterity:</b><input id="dex"> @Dex </input>
+	</td>
+	<td>
+          <b>Constitution:</b><input id="con"> @Con </input>
+	</td>
+      </tr>
+      <tr>
+        <td>
+          <b>Intelligence:</b><input id="int"> @Int </input>
+	  </td>
+        <td>
+          <b>Wisdom:</b><input id="wis"> @Wis </input>
+        </td>
+	<td>
+          <b>Charisma:</b><input id="cha"> @Cha </input>
+        </td>
+      </tr>
+      <tr>
+	<td COLSPAN=2><button ONCLICK="CreateCharacter()">Create</button>
+	</td>
+	<td>
+	  <button ONCLICK="NewAttributes()">New Attributes</button>
+	</td>
+      </tr>
+    </table>
+  </body>
+</html>
