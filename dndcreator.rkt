@@ -23,6 +23,9 @@
 (define (character-db-search id)
   (query-rows character-db "SELECT * from characters where id=$1" id))
 
+(define (character-db-delete id)
+  (query-exec character-db "DELETE from characters where id=$1" id))
+
 (define (character-db-all)
   (query-rows character-db "SELECT * from characters"))
 
@@ -42,7 +45,7 @@
                [int (character-int c)]
                [wis (character-wis c)]
                [cha (character-cha c)])
-            (include-template "character.html"))))))
+            (include-template "html/character.html"))))))
 
 (define (character->xexpr-row c)
   (let
@@ -56,18 +59,23 @@
        [int (number->string (character-int c))]
        [wis (number->string (character-wis c))]
        [cha (number->string (character-cha c))]) 
-    `(tr
-      (td (form ([action ,(string-append "characters/" id ".html")])
-                (input ([type "submit"] [value "View"]))))
-      (td ,name)
-      (td ,class)
-      (td ,race)
-      (td ,str)
-      (td ,dex)
-      (td ,con)
-      (td ,int)
-      (td ,wis)
-      (td ,cha))))
+    `(tr ([align "center"])
+         (td 
+          (a ([href ,(string-append "/characters/" id ".html")])
+             (button "View"))
+          (button ([onclick ,(string-append "delete_character(" id ")")])
+                  "Delete")
+          (a ([href ,(string-append "/characters/" id "/edit")])
+             (button "Edit")))
+         (td ,name)
+         (td ,class)
+         (td ,race)
+         (td ,str)
+         (td ,dex)
+         (td ,con)
+         (td ,int)
+         (td ,wis)
+         (td ,cha))))
 
 (define (load-characters)
   (define all-characters (character-db-all))
@@ -119,6 +127,10 @@
      (string-join
        (list "POST->characters" (number->string (character-id c)))
        "/"))
+  (define getEditEndpoint
+     (string-join
+       (list "GET->characters" (number->string (character-id c)) "edit")
+       "/"))
   (define endpointString
     (string-join
      (list 
@@ -129,17 +141,24 @@
      "."))
   (set-add! endpoints (string->symbol deleteEndpoint))
   (set-add! endpoints (string->symbol postEndpoint))
+  (set-add! endpoints (string->symbol getEditEndpoint))
   (set-add! endpoints (string->symbol endpointString))
   (eval `(define ,(string->symbol deleteEndpoint)
         (λ (req)
           (set-remove! endpoints (string->symbol ,deleteEndpoint))
           (set-remove! endpoints (string->symbol ,postEndpoint))
+          (set-remove! endpoints (string->symbol ,getEditEndpoint))
           (set-remove! endpoints (string->symbol ,endpointString))
+          (character-db-delete (character-id ,c))
           (character-html ,c req)))
         ns)
   (eval `(define ,(string->symbol postEndpoint)
         (λ (req)
           (EDIT-POST->characters ,c req)))
+        ns)
+  (eval `(define ,(string->symbol getEditEndpoint)
+        (λ (req)
+          (EDIT-GET->characters ,c req)))
         ns)
   (eval `(define ,(string->symbol endpointString)
         (λ (req)
@@ -160,7 +179,7 @@
   (define uri (request-uri req))
   (define path (map path/param-path (url-path uri)))
   (define endpoint
-    (string->symbol (string-join (list (~a method) (string-join path "/")) "->")))
+    (string->symbol (string-join (list (~a method) (string-trim (string-join path "/") "/")) "->")))
   (display endpoint)
   (if (set-member? endpoints endpoint)
       ((eval endpoint ns) req)
@@ -211,7 +230,7 @@
                                     [Int (standard-roll)]
                                     [Wis (standard-roll)]
                                     [Cha (standard-roll)]
-                                    [Target "/characters/create"]) (include-template "create.html"))))))
+                                    [Target "\"/characters/create\""]) (include-template "html/create.html"))))))
 
 (define (PUT->characters/create req)
   (define post-data (bytes->string/utf-8 (request-post-data/raw req)))
@@ -259,35 +278,55 @@
                                     [Int (character-int c)]
                                     [Wis (character-wis c)]
                                     [Cha (character-cha c)]
-                                    [Target (string-append "/characters/" (number->string (character-id c)))])
-                                (include-template "create.html"))))))
+                                    [Target (string-append "\"/characters/" (number->string (character-id c)) "\"")])
+                                (include-template "html/create.html"))))))
 
 (define (GET->characters req)
   (define all-characters (character-db-all))
   (define (loop ls)
     (if (eq? ls empty)
         empty
-        (cons (character->xexpr-row (apply character (vector->list (first ls)))) (loop (rest ls)))))
+        (cons (character->xexpr-row (apply character (vector->list (first ls)))) (loop (rest ls)))))  
+  (define delete-js
+    `(script
+      ,(string-join
+        (list
+         "function delete_character(id) {"
+         "var xhttp = new XMLHttpRequest();"
+         "xhttp.onreadystatechange = function() {"
+         "if (xhttp.readyState == 4) {"
+         "location.reload();"
+         "}"
+         "};"
+         "xhttp.open(\"DELETE\", \"/characters/\"+id, true);"
+         "xhttp.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");"	
+         "xhttp.send();"
+         "}")
+        "\n")))
+       
   (define rows
     (cons
-     `table
+     `table 
      (cons
-      `(tr
-        (th)
-        (th "Name")
-        (th "Class")
-        (th "Race")
-        (th "Str")
-        (th "Dex")
-        (th "Con")
-        (th "Int")
-        (th "Wis")
-        (th "Cha"))
-        (loop all-characters))))
+      `([align "center"])
+      (cons
+       `(tr
+         (th)
+         (th "Name")
+         (th "Class")
+         (th "Race")
+         (th "Str")
+         (th "Dex")
+         (th "Con")
+         (th "Int")
+         (th "Wis")
+         (th "Cha"))
+       (loop all-characters)))))
   (response/xexpr
    `(html
      (head)
      (body
+      ,delete-js
       (div
        (h3 "List of characters")
        ,rows)))))
@@ -305,6 +344,7 @@
 
 (define (run-server)
   (load-characters)
+  (display endpoints)
   (serve/servlet hello-servlet
                  #:servlet-regexp #rx""
                  #:servlet-path "/characters"
