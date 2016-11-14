@@ -284,7 +284,7 @@
   (define cha (string->number (cdr (assq 'cha form-data))))
   (define char (new-character (list name class race str dex con int wis cha)))
   (define endpoint (character-new char))
-  ((eval endpoint) req))
+  (GET->characters req))
 
 (define (EDIT-POST->characters c req)
   (define post-data (bytes->string/utf-8 (request-post-data/raw req)))
@@ -398,3 +398,5 @@
   ;#:ssl? #t
   ;#:ssl-cert cert-path
   ;#:ssl-key  key-path)
+
+(run-server)
