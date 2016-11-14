@@ -347,7 +347,6 @@
          "xhttp.send();"
          "}")
         "\n")))
-       
   (define rows
     (cons
      `table 
@@ -371,9 +370,12 @@
      (head)
      (body
       ,delete-js
-      (div
-       (h3 "List of characters")
-       ,rows)))))
+      (center
+       (div
+        (h3 "List of characters")
+        ,rows)
+       (a ([href "/characters/create"])
+          (button "New Character"))))))
 
 
 (define (wrong-endpoint req)  
