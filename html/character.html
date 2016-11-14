@@ -2,24 +2,32 @@
 <html>
   <body>
     <center>
-      <h3> Character Sheet for @name </h3>
+      <h3> @|name|: @race @class </h3>
       <br>
       <table>
 	<tr>
-	  <td>Class: @class </td>
-	  <td>Race: @race </td>
+	  <td><b>Stat Name</b></td><td><b>Value</b></td><td><b>Modifier</b></td>
 	</tr>
 	<tr>
-	  <td>Str: @str </td>
-	  <td>Dex: @dex </td>
+	  <td>Str:</td><td> @str </td><td> @(/ (- str 11) 2) </td>
 	</tr>
 	<tr>
-	  <td>Con: @con </td>
-	  <td>Int: @int </td>
+	  <td>Dex:</td><td>  @dex </td><td> @(/ (- dex 11) 2) </td>
 	</tr>
 	<tr>
-	  <td>Wis: @wis </td>
-	  <td>Cha: @cha </td>
+	  <td>Con:</td><td>  @con </td><td> @(/ (- con 11) 2) </td>
+	</tr>
+	<tr>
+	  <td>Int:</td><td>  @int </td><td> @(/ (- int 11) 2) </td>
+	</tr>
+	<tr>
+	  <td>Wis:</td><td>  @wis </td><td> @(/ (- wis 11) 2) </td>
+	</tr>
+	<tr>
+	  <td>Cha:</td><td>  @cha </td><td> @(/ (- cha 11) 2) </td>
+	</tr>
+	<tr>
+	  <td>AC:</td><td colspan="2"> @(+ 10 dex) </td>
 	</tr>
       </table>
       <a href="/characters">

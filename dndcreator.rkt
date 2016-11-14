@@ -375,7 +375,7 @@
         (h3 "List of characters")
         ,rows)
        (a ([href "/characters/create"])
-          (button "New Character"))))))
+          (button "New Character")))))))
 
 
 (define (wrong-endpoint req)  
