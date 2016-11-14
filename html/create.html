@@ -68,10 +68,26 @@
 	  <b>Name:</b><input id="name" value="@|Name|"/>
 	</td>
 	<td>
-	  <b>Race:</b><input id="race" value="@|Race|"/>
+	  <b>Race:</b>
+	  <select class="selectpicker" id="race" value="@|Race|">
+            <optgroup label="select">
+              <option @(if (equal? Race "Human") "selected" "")>Human</option>
+              <option @(if (equal? Race "Dwarf") "selected" "")>Dwarf</option>
+              <option @(if (equal? Race "Elf") "selected" "")>Elf</option>
+              <option @(if (equal? Race "Half-elf") "selected" "")>Half-elf</option>
+            </optgroup>
+          </select>
 	</td>
 	<td>
-          <b>Class:</b><input id="class" value="@|Class|"/>
+          <b>Class:</b>
+	  <select class="selectpicker" id="class" value="@|Class|">
+            <optgroup label="select">
+              <option @(if (equal? Class "Fighter") "selected" "") >Fighter</option>
+              <option @(if (equal? Class "Cleric") "selected" "") >Cleric</option>
+              <option @(if (equal? Class "Wizard") "selected" "")>Wizard</option>
+              <option @(if (equal? Class "Thief") "selected" "")>Thief</option>
+            </optgroup>
+          </select>
         </td>
       </tr>
       <tr>

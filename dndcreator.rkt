@@ -4,6 +4,7 @@
          web-server/servlet
          web-server/servlet-env
          html
+         json
          xml
          db
          net/uri-codec
@@ -46,6 +47,28 @@
                [wis (character-wis c)]
                [cha (character-cha c)])
             (include-template "html/character.html"))))))
+
+(define (character->jsexpr c)
+  (let ([id (character-id c)]
+        [name (character-name c)]
+        [race (character-race c)]
+        [str (character-str c)]
+        [dex (character-dex c)]
+        [con (character-con c)]
+        [int (character-int c)]
+        [wis (character-wis c)]
+        [cha (character-cha c)])
+    (hasheq `character
+             (hasheq
+              `id id
+              `name name
+              `race race
+              `str str
+              `dex dex
+              `con con
+              `int int
+              `wis wis
+              `cha cha))))
 
 (define (character->xexpr-row c)
   (let
@@ -139,16 +162,27 @@
        "/")
       "html")
      "."))
+  (define jsonEndpointString
+    (string-join
+     (list 
+      (string-join
+       (list "GET->characters" (number->string (character-id c)))
+       "/")
+      "json")
+     "."))
   (set-add! endpoints (string->symbol deleteEndpoint))
   (set-add! endpoints (string->symbol postEndpoint))
   (set-add! endpoints (string->symbol getEditEndpoint))
   (set-add! endpoints (string->symbol endpointString))
+  (set-add! endpoints (string->symbol jsonEndpointString))
+  ;JSON-GET->characters
   (eval `(define ,(string->symbol deleteEndpoint)
         (λ (req)
           (set-remove! endpoints (string->symbol ,deleteEndpoint))
           (set-remove! endpoints (string->symbol ,postEndpoint))
           (set-remove! endpoints (string->symbol ,getEditEndpoint))
           (set-remove! endpoints (string->symbol ,endpointString))
+          (set-remove! endpoints (string->symbol ,jsonEndpointString))
           (character-db-delete (character-id ,c))
           (character-html ,c req)))
         ns)
@@ -163,6 +197,10 @@
   (eval `(define ,(string->symbol endpointString)
         (λ (req)
           (character-html ,c req)))
+        ns)
+  (eval `(define ,(string->symbol jsonEndpointString)
+        (λ (req)
+          (JSON-GET->characters ,c req)))
         ns)
   (string->symbol endpointString))
 
@@ -280,6 +318,12 @@
                                     [Cha (character-cha c)]
                                     [Target (string-append "\"/characters/" (number->string (character-id c)) "\"")])
                                 (include-template "html/create.html"))))))
+(define (JSON-GET->characters c req)
+  (response/full
+   200 #"Okay"
+   (current-seconds) #"text/json; charset=utf-8"
+   empty
+   (list (string->bytes/utf-8 (jsexpr->string (character->jsexpr c))))))
 
 (define (GET->characters req)
   (define all-characters (character-db-all))
@@ -353,3 +397,5 @@
   ;#:ssl? #t
   ;#:ssl-cert cert-path
   ;#:ssl-key  key-path)
+
+(define c (apply character (vector->list (first (character-db-search 964248)))))
