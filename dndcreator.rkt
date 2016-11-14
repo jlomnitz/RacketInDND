@@ -1,4 +1,4 @@
-s #lang racket
+#lang racket
 
 (require web-server/templates
          web-server/servlet
