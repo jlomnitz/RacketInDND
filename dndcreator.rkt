@@ -1,4 +1,4 @@
-#lang racket
+s #lang racket
 
 (require web-server/templates
          web-server/servlet
@@ -19,7 +19,7 @@
    #:database "dand.db"))
 
 (define (initialize-db)
-  (query-exec character-db "CREATE TABLE characters (id, name, class, race, str, dex, con, int, wis, cha)"))
+  (query-exec character-db "CREATE TABLE IF NOT EXISTS characters (id, name, class, race, str, dex, con, int, wis, cha)"))
 
 (define (character-db-search id)
   (query-rows character-db "SELECT * from characters where id=$1" id))
@@ -396,9 +396,12 @@
                  #:servlet-regexp #rx""
                  #:servlet-path "/characters"
                  #:port 8099
+                 #:launch-browser? #f
+                 #:listen-ip #f
                  ))
   ;#:ssl? #t
   ;#:ssl-cert cert-path
   ;#:ssl-key  key-path)
 
+(initialize-db)
 (run-server)
