@@ -397,5 +397,3 @@
   ;#:ssl? #t
   ;#:ssl-cert cert-path
   ;#:ssl-key  key-path)
-
-(define c (apply character (vector->list (first (character-db-search 964248)))))
