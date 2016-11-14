@@ -379,6 +379,7 @@
 (define (wrong-endpoint req)  
   (response/xexpr
    #:code 404
+   #:message #"Route does not exist"
    `(html
      (head)
      (body
