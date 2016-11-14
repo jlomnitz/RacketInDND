@@ -77,9 +77,9 @@ hooks:
 # During the ApplicationStop deployment lifecycle event, run the commands 
 #   in the script specified in "location" starting from the root of the 
 #   revision's file bundle.
-   ApplicationStop:
-     - location: stop.sh 
-       timeout:  1800
+#   ApplicationStop:
+#     - location: stop.sh 
+#       timeout:  1800
 #       runas: ec2-user
 #     - location: 
 #       timeout:
@@ -95,9 +95,9 @@ hooks:
 #       runas:
 # # During the AfterInstall deployment lifecycle event, run the commands 
 # #   in the script specified in "location".
-   AfterInstall:
-     - location: start.sh
-       timeout: 1800
+#   AfterInstall:
+#     - location: start.sh
+#       timeout: 1800
 #       runas:
 #     - location: 
 #       timeout:
